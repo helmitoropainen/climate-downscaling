@@ -28,6 +28,12 @@ def load_data(args):
         input_val = input_train
         target_val = target_train
 
+    # for /era5_temp_precip_data/, if dim_channels = 1: temperature, if dim_channels = 2: temperature, precipitation
+    input_train = input_train[:, 0:args.dim_channels, ...]
+    target_train = target_train[:, 0:args.dim_channels, ...]
+    input_val = input_val[:, 0:args.dim_channels, ...]
+    target_val = target_val[:, 0:args.dim_channels, ...]
+
     input_train_orig = None 
     input_val_orig = None
 
@@ -280,7 +286,7 @@ def run_diffusion_model(inputs, model, args, device, inputs_original=None, num_s
     # Main sampling loop.
     x_next = init_noise.to(torch.float64) * t_steps[0]
 
-    for i, (t_cur, t_next) in tqdm(enumerate(zip(t_steps[:-1], t_steps[1:])), total=num_steps, desc="Diffusion steps"):
+    for i, (t_cur, t_next) in enumerate(zip(t_steps[:-1], t_steps[1:])):
 
         x_cur = x_next
 
@@ -338,7 +344,7 @@ def run_flow_matching(inputs, model, args, device, inputs_original=None, num_ste
         return x_next
     
     x = inputs
-    for i in tqdm(range(num_steps), desc="Flow steps"):
+    for i in range(num_steps):
         x = step(x, time_steps[i], time_steps[i + 1])
 
     predicted = x

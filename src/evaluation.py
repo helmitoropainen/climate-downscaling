@@ -51,6 +51,10 @@ def calculate_scores(args):
     input_val = torch.load(args.data_path+args.dataset+'/'+ args.test_val_train+'/input_'+ args.test_val_train+'.pt')
     target_val = torch.load(args.data_path+args.dataset+'/'+ args.test_val_train+'/target_'+ args.test_val_train+'.pt')
 
+    # for /era5_temp_precip_data/, if dim_channels = 1: temperature, if dim_channels = 2: temperature, precipitation
+    input_val = input_val[:, 0:args.dim_channels, ...]
+    target_val = target_val[:, 0:args.dim_channels, ...]
+
     val_data = TensorDataset(input_val, target_val)
     pred = np.zeros(target_val.shape)
     max_val = target_val.max()
@@ -124,8 +128,9 @@ def calculate_scores(args):
 # faster alternative with less metrics
 def calculate_scores_simple(args):
     target_val = torch.load(args.data_path+args.dataset+'/'+ args.test_val_train+'/target_'+ args.test_val_train+'.pt')
-    if target_val.ndim == 5:
-        target_val = target_val.squeeze(2) # 5D to 4D
+
+    # for /era5_temp_precip_data/, if dim_channels = 1: temperature, if dim_channels = 2: temperature, precipitation
+    target_val = target_val[:, 0:args.dim_channels, ...]
 
     pred = np.zeros(target_val.shape)
     

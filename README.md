@@ -28,6 +28,7 @@ $ wget --no-check-certificate 'https://drive.usercontent.google.com/download?id=
 
 unzip
 ```sh
+$ mkdir data/
 $ mkdir data/era5_temp_precip_data/
 $ unzip -o era5_temp_precip_data.zip -d data/era5_temp_precip_data/
 $ rm era5_temp_precip_data.zip 

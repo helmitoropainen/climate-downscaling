@@ -11,7 +11,7 @@ import os
 
 def add_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", default="era5_sr_data_temp", help="choose a data set to use")
+    parser.add_argument("--dataset", default="era5_temp_precip_data", help="choose a data set to use")
     parser.add_argument("--model", default="flow")
     parser.add_argument("--bias_flow", default="no")
     parser.add_argument("--model_id", default="test")
