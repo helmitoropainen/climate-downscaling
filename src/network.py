@@ -19,6 +19,10 @@
 """Model architectures and preconditioning schemes used in the paper
 "Elucidating the Design Space of Diffusion-Based Generative Models"."""
 
+import os
+os.environ.setdefault("MIOPEN_LOG_LEVEL", "3")
+os.environ.setdefault("MIOPEN_FIND_MODE", "FAST")
+
 import numpy as np
 import torch
 from torch.nn.functional import silu
@@ -259,8 +263,10 @@ class UNet(torch.nn.Module):
         self.map_noise = PositionalEmbedding(num_channels=model_channels) if use_diffuse else None
         self.map_augment = Linear(in_features=augment_dim, out_features=model_channels, bias=False, **init_zero) if augment_dim else None
         self.map_label = Linear(in_features=label_dim, out_features=emb_channels, bias=False, init_mode='kaiming_normal', init_weight=np.sqrt(label_dim)) if label_dim else None
-        self.map_layer0 = Linear(in_features=model_channels, out_features=emb_channels, **init) if (use_diffuse or augment_dim or label_dim) else None
-        self.map_layer1 = Linear(in_features=emb_channels, out_features=emb_channels, **init) if (use_diffuse or augment_dim or label_dim) else None
+
+        if self.map_noise is not None:
+            self.map_layer0 = Linear(in_features=model_channels, out_features=emb_channels, **init) if (use_diffuse or augment_dim or label_dim) else None
+            self.map_layer1 = Linear(in_features=emb_channels, out_features=emb_channels, **init) if (use_diffuse or augment_dim or label_dim) else None
 
         assert len(img_resolution) == 2
 
@@ -309,9 +315,10 @@ class UNet(torch.nn.Module):
     def forward(self, x, noise_labels=None, class_labels=None,
                 augment_labels=None):
         
-        if self.map_layer1 is not None:
+        if not (self.map_noise is None and self.map_augment is None and self.map_label is None):
             # Mapping.
-            emb = torch.zeros([1, self.map_layer1.in_features])
+            emb = torch.zeros([1, self.emb_channels])
+            # emb = torch.zeros([1, self.map_layer1.in_features])
             emb = emb.type_as(x)
             if self.map_label is not None:
                 tmp = class_labels
@@ -436,8 +443,15 @@ class Flow(torch.nn.Module):
         **model_kwargs,                     # Keyword arguments for the underlying model.
     ):
         super().__init__()
+        self.embed_t = True
         self.img_resolution = img_resolution
-        self.in_channels = in_channels
+        if self.embed_t:
+            in_channels = in_channels - 1 # embed t
+            self.in_channels = in_channels
+            use_diffuse=1
+        else:
+            self.in_channels = in_channels # t as model channel
+            use_diffuse=0
         self.out_channels = out_channels
         self.label_dim = label_dim
         self.use_fp16 = use_fp16
@@ -445,17 +459,47 @@ class Flow(torch.nn.Module):
         self.model = globals()[model_type](
             img_resolution=img_resolution, in_channels=in_channels,
             out_channels=out_channels, label_dim=label_dim, 
-            use_diffuse=0, **model_kwargs)
+            use_diffuse=use_diffuse, **model_kwargs)
         
-    def forward(self, x_t, t, force_fp32=True):
+    def forward(self, x_t, t, condition_img=None, class_labels=None, force_fp32=True):
 
-        dtype = torch.float16 if (self.use_fp16 and not force_fp32 and in_img.device.type == 'cuda') else torch.float32
+        dtype = torch.float16 if (self.use_fp16 and not force_fp32 and x_t.device.type == 'cuda') else torch.float32
+
+        if self.embed_t:
+
+            t = t.reshape(-1, 1, 1, 1)
+            t = t.flatten()
+
+            if condition_img is None:
+                in_img = x_t
+            else: in_img = torch.cat([x_t, condition_img], dim=1) # include aux variables
+
+            in_img = in_img.to(dtype)
+
+            if self.label_dim == 0:
+                class_labels = None
+            else:
+                class_labels = class_labels.to(torch.float32).to(dtype).reshape(-1, self.label_dim) # include row, col, doy
+
+            out = self.model(in_img, noise_labels=t, class_labels=class_labels)
+                
+
+        else:
         
-        t = t.view(-1, 1, 1, 1).expand(-1, 1, x_t.shape[-2], x_t.shape[-1]) # shape (B, 1, H, W)
-        in_img = torch.cat([x_t, t], dim=1)
-        in_img = in_img.to(dtype)
-        
-        out = self.model(in_img)
+            t = t.view(-1, 1, 1, 1).expand(-1, 1, x_t.shape[-2], x_t.shape[-1]) # shape (B, 1, H, W)
+
+            if condition_img is None:
+                in_img = torch.cat([x_t, t], dim=1)
+            else: in_img = torch.cat([x_t, t, condition_img], dim=1) # include aux variables
+
+            in_img = in_img.to(dtype)
+
+            if self.label_dim == 0:
+                class_labels = None
+            else:
+                class_labels = class_labels.to(torch.float32).to(dtype).reshape(-1, self.label_dim) # include row, col, doy
+
+            out = self.model(in_img, class_labels=class_labels)
         
         return out
     

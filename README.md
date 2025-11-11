@@ -1,6 +1,6 @@
 # Climate dowscaling
 
-4x Climate downscaling using Diffusion Models or Flow Matching
+Climate downscaling using Diffusion Models or Flow Matching
 
 This repo is modified from 
 https://github.com/RolnickLab/constrained-downscaling 
@@ -17,7 +17,7 @@ $ conda env create -f requirements.yml
 $ conda activate climate-downscaling
 ```
 
-## Get the data
+## Get the data (ERA5)
 
 A dataset for this repo is available at: https://drive.google.com/file/d/11308-R6nhsLhVq0aCXVNZssKyiaRCOs-/view?usp=drive_link. 
 
@@ -35,6 +35,8 @@ $ rm era5_temp_precip_data.zip
 ```
 
 The ERA5 data (0.25°) is downloaded from https://github.com/google-research/weatherbench2 and contains hourly measurements for 2-meter temperature [°C] in the 1st channel and total precipitaion [m] in the 2nd channel. The training set covers years 1959–2013, the validation set years 2014–2018, and the test set years 2019–2023 (measurements for 2023 end in October). Only 30 random hourly samples are included for each month. The dataset covers the Europe region (33–65° N, 0–32°), resulting in 128x128 images and a corresponding 32x32 low resolution image created by taking means of 4x4 patches.
+
+Script at: data_processing/temp_precip_data_*.py
 
 ## Model training
 Example setups:
@@ -61,3 +63,31 @@ Example sampling with the Flow Matching model and back_projection constraint:
 ```sh
 srun python ./src/main.py --dataset era5_temp_precip_data --model flow --model_id flow_model --test_val_train test --training_evalonly evalonly --constraint back_projection
 ```
+
+## 10x downscaling
+Ongoing experiments with 10x downscaling from E-OBS input to NGCD target for the Nordics.
+
+Data processing sctipt at: data_processing/save_nordic_lr-hr_data.py
+
+Visualisation script at: data_processing/pediction_visualisation.ipynb
+
+Example training setup
+```
+--nordics True \
+--nordics_time True --nordics_constants True \
+--nordics_start 2000 --nordics_end 2020
+```
+
+Example sampling setup
+```
+--nordics True \
+--nordics_time True --nordics_constants True \
+--nordics_start 2024 --nordics_end 2024 \
+--nordics_month 1 \ 
+--nordics_patch_eval True
+```
+(month=0 : full year)
+
+## Links
+Master's Thesis Diffusion Models for Climate Downsclaing (2025)
+https://urn.fi/URN:NBN:fi-fe2025063075584
