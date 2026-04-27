@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Interactive Demo &ndash; Efficient Flow Matching for Climate Downscaling</title>
+        <link rel="stylesheet" href="../src/styles.css"></link>
+        <link rel="stylesheet" href="demo_styles.css"></link>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+
+    <body>
+        <span class="exit">
+            <a style="text-decoration: none;" class="run-btn" href="../">Close</a>
+        </span>
+        <div class="content demo">
+            <p class="title">Climate Downscaling &ndash; Interactive Demo</p>
+            <div class="controls">
+                <div class="ctrl-group">
+                    <span class="ctrl-label">Select date</span>
+                    <select id="dateSelect"></select>
+                </div>
+                <div class="ctrl-group">
+                    <span class="ctrl-label">Display region</span>
+                    <select id="regionSelect"></select>
+                </div>
+                <button id="runBtn" onclick="runModel()" class="run-btn">Run model</button>
+            </div>
+
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                
+            <div class="panels">
+                <div class="panel">
+                    <div class="panel-header"><div class="panel-dot dot-blue"></div>ERA5 input (9 km)</div>
+                    <img id="imgERA5">
+                    <div class="panel-footer">Coarse reanalysis data</div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><div class="panel-dot dot-green"></div>NGCD target (1 km)</div>
+                    <img id="imgNGCD">
+                    <div class="panel-footer">Ground truth</div>
+                </div>   
+                <div class="panel">
+                    <div class="panel-header"><div class="panel-dot dot-purple"></div>Model prediction</div>
+                    <div style="position: relative; text-align: center;">
+                        <img id="imgPred" style="opacity:0.2; filter:blur(4px);">
+                        <div id="msg" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">press run model</div>
+                    </div>
+                    <div id="mae" class="panel-footer">&mdash;</div>
+                </div>
+            </div>
+
+            <div class="panel info-row" id="infoRow">Press <strong>Run model</strong> for the prediction.</div>
+        </div>
+        <script src="demo.js"></script>
+    </body>
+</html>

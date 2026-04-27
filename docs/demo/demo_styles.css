@@ -1,0 +1,162 @@
+.demo {
+    max-width: 960px;
+    margin: auto;
+}
+
+.title {
+    font-size: 1rem;
+    font-weight: 400;
+    margin: 12px 0px;
+    text-transform: uppercase;
+    text-align: left;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: flex-end;
+    justify-content: left;
+    margin-bottom: 1rem;
+}
+
+.ctrl-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ctrl-label {
+    text-align: left;
+    color: #888;
+}
+
+select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 0.5px solid #ccc;
+    background: #fff;
+    color: #363636;
+    cursor: pointer;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 0.95rem;
+}
+
+.run-btn { 
+    padding: 6px 24px;
+    border-radius: 6px;
+    border: 0.5px solid #ccc;
+    background: #fff;
+    color: #363636;
+    cursor: pointer;
+    min-width: 115px;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 0.95rem;
+}
+.run-btn:hover {
+    opacity: 0.75;
+}
+
+.panels {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    max-width: 960px;
+    margin: auto;
+    text-align: left;
+    padding: 12px 0;
+}
+
+@media (max-width: 600px) {
+    .panels { grid-template-columns: 1fr; }
+}
+
+.panel {
+    border-radius: 8px;
+    border: 0.5px solid #ddd;
+    overflow: hidden;
+}
+
+.panel img {
+    width: 100%; 
+    display: block;
+    transition: opacity 0.2s, filter 0.2s;
+}
+
+.panel-header {
+    padding: 8px 12px;
+    font-weight: 500;
+    color: #888;
+    border-bottom: 0.5px solid #ddd;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.panel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dot-blue   { background: #378ADD; }
+.dot-green  { background: #639922; }
+.dot-purple { background: #7F77DD; }
+
+.panel-footer {
+    padding: 6px 12px;
+    color: #aaa;
+    border-top: 0.5px solid #ddd;
+    min-height: 26px;
+}
+
+.progress-bar {
+    height: 2px;
+    background: #eee;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #7F77DD;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.info-row {
+    padding: 10px 12px;
+    background: #fafafa;
+    border-radius: 6px;
+    border: 0.5px solid #ddd;
+    color: #888;
+}
+
+.mae-badge {
+    display: inline-block;
+    background: #EEEDFE;
+    color: #3C3489;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-weight: 500;
+}
+
+.exit {
+    padding: 0 48px;
+    display: block;
+    text-align: right;
+}
+
+body {
+    padding-bottom: 96px;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding-top: 24px;
+        padding-bottom: 48px;
+    }
+    .exit {
+        padding: 0 24px;
+    }
+}

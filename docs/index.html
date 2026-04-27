@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Efficient Flow Matching for Climate Downscaling</title>
+        <link rel="stylesheet" href="src/styles.css"></link>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+
+    <body>
+        <div class="content">
+            <h1>
+                Efficient Flow Matching for
+                <br>
+                Climate Downscaling
+            </h1>
+            <span class="author">
+                <a href="https://github.com/helmitoropainen">Helmi Toropainen</a><sup>1,2,3</sup>,
+                <a href="https://holmes-alan.github.io/">Zhi-Song Liu</a><sup>2,3</sup>
+                <br>
+                <sup>1</sup>University of Helsinki,
+                
+                <sup>2</sup>LUT University,
+                
+                <sup>3</sup><a href="https://amc-lahti.fi">Atmospheric Modelling Centre Lahti</a>
+            </span>
+            <br>
+            <div class="button-div">
+                <a class="button" href="https://github.com/helmitoropainen/climate-downscaling">
+                    <span style="padding-right: 5px;">
+                        <img src="src/github-mark-white.svg" width="16px"></img>
+                    </span>
+                    <span>
+                        Code
+                    </span>
+                </a>
+                <a class="button" href="demo/">
+                    <span>
+                        Demo
+                    </span>
+                </a>
+            </div>
+
+            
+        </div>
+
+        <div class="content">
+            <img src="src/nordic_gif_2024_all.gif" class="image-large">
+        </div>
+
+        <div class="content">
+            <div class="text" >
+                <h2>Abstract</h2>
+                <p>
+                    High-resolution climate information is essential for understanding local impacts of climate change, 
+                    yet global models remain too coarse for regional applications. This work explores generative 
+                    neural networks for climate downscaling, transforming coarse climate model outputs into fine-scale 
+                    projections. We focus on <i>Flow Matching</i>, a recent alternative to diffusion models, to efficiently learn 
+                    continuous mappings between low- and high-resolution climate fields. 
+
+                <p>
+                    Using the NGCD gridded datasets at 1 km spatial resolution and daily temporal resolution across the 
+                    Nordics, the model is trained to learn spatial patterns and reconstruct fine-scale temperature fields from 
+                    E-OBS gridded dataset at 10 km resolution. Flow Matching provides a stable and efficient framework 
+                    for high-resolution generation while allowing incorporation of geographical features and physical knowledge. 
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="content">
+            <h2>Method</h2>
+            <img src="src/flow_visu_v2.png" class="image-large">
+            <div class="text">
+                <p>
+                    The model is trained on NGCD daily 2-m temperature fields at 1 km resolution across the Nordic region. 
+                    Coarse E-OBS fields at 10 km resolution are first bilinearly upsampled to the NGCD grid and used as 
+                    the starting point for downscaling. To providde geographical and temporal context, the model also receives auxilary inputs including elevation,
+                    land-water mask and (optionally) the previous two days of low-resolution temperature fields to help preserve 
+                    variable dynamics. 
+                </p>
+                <p>   
+                    Downscaling starts from bilinear upsampling of the E-OBS data to the 1 km grid, after which the Flow Matching 
+                    framework iteratively reconstructs the spatial details. During training, the model learns a flow field that 
+                    transforms the input toward the high-resolution target along a continuous trajectory. All inputs are processed 
+                    as overlapping 128 &#10005; 128 patches. This patch-based design enables efficient high-resolution projections 
+                    over large domains (1900 &#10005; 1400 px covering three Nordic countriers) while impoving spatial robustness.    
+                </p>
+                <p>     
+                    We evaluate multiple configurations, including models with and without auxiliary features and models 
+                    incorporating physical consistency constraints. Models are trained on years 2000&ndash;2020 and evaluated on 
+                    unseen days in 2024 using mean absolute error (MAE).
+                </p>  
+                    
+            </div>
+        </div>
+
+        <div class="content">
+            <h2>Preliminary results</h2>
+            <div class="scroll">
+                <table class="center">
+                    <tr>
+                        <th>Experiment</th>
+                        <th>MAE (&#8595;)</th>
+                        <th>Test</th>
+                        <th>GPUs</th>
+                        <th>Epochs</th>
+                        <th>Image patches</th>
+                    </tr>
+                    <tr>
+                        <td><i>E-OBS</i></td>
+                        <td>1.8152 &deg;C</td>
+                        <td>2024</td>
+                        </i>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>3.3057 &deg;C</td>
+                        <td>2024-01</td>
+                        </i>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>1.6809 &deg;C</td>
+                        <td>2024-06</td>
+                        </i>
+                    </tr>
+                    <tr class="extra-row"></tr>
+                    <tr>
+                        <td>Baseline</td>
+                        <td>2.0983 &deg;C</td>
+                        <td>2024</td>
+                        <td>32</td>
+                        <td>48</td>
+                        <td>117</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>3.4595 &deg;C</td>
+                        <td>2024-01</td>
+                        <td>32</td>
+                        <td>48</td>
+                        <td>117</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>1.9238 &deg;</td>
+                        <td>2024-06</td>
+                        <td>32</td>
+                        <td>48</td>
+                        <td>117</td>
+                    </tr>
+                    <tr class="extra-row"></tr>
+                    <tr>
+                        <td>+ Auxilary variables</td>
+                        <td>1.7428 &deg;C</td>
+                        <td>2024</td>
+                        <td>64</td>
+                        <td>51</td>
+                        <td>117</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>2.9678 &deg;C</td>
+                        <td>2024-01</td>
+                        <td>64</td>
+                        <td>51</td>
+                        <td>117</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>1.5990 &deg;C</td>
+                        <td>2024-06</td>
+                        <td>64</td>
+                        <td>51</td>
+                        <td>117</td>
+                    </tr>
+                    <tr class="extra-row"></tr>
+                    <tr>
+                        <td>
+                            + Physical constraint
+                            <br>
+                            + LR time
+                            </td>
+                        <td><b>0.8139 &deg;C</b></td>
+                        <td>2024</td>
+                        <td>128</td>
+                        <td>48</td>
+                        <td><b>174</b></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><b>1.3525 &deg;C</b></td>
+                        <td>2024-01</td>
+                        <td>128</td>
+                        <td>48</td>
+                        <td><b>174</b></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><b>0.6606 &deg;C</b></td>
+                        <td>2024-06</td>
+                        <td>128</td>
+                        <td>48</td>
+                        <td><b>174</b></td>
+                    </tr>
+                    
+                </table>
+            </div>
+
+            <img src="src/norway_june.png" class="image-small" style="margin-top: 30px;">
+            <br>
+            <img src="src/finland_june.png" class="image-small" style="margin-top: 30px;">
+
+            <div class="text">
+                <p>Model input, target, and prediction over southern Norway and Finland in June 2024. 
+                    The Flow Matching framework is able to reconstruct fine-scale geographic detail and correct input temperatures.
+                    Differences between input and target data vary across regions and seasons as well as individual dates.
+                </p>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer">
+                <p>
+                    Source code for this website is modified from this <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> template. Thank you!
+                </p>
+            </div>
+        </footer>
+    </body>
+</html>
