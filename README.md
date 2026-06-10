@@ -1,4 +1,4 @@
-# Climate dowscaling
+# Climate downscaling
 
 Climate downscaling using Diffusion Models or Flow Matching
 
